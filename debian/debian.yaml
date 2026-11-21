@@ -1,0 +1,14 @@
+flutter_app:
+  command: lgui_random_word_generator
+  icon: assets/images/logo.png
+  arch: x64
+  nonInteractive: true
+
+control:
+  Package: lgui-random-word-generator
+  Version: 1.0.0
+  Architecture: amd64
+  Priority: optional
+  Maintainer: Kutlwano P. Maruatona <kutlwanodrew.dev@gmail.com.com>
+  Description: random word generator
+   A professional random word generator desktop application.

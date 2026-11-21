@@ -1,0 +1,129 @@
+name: Build and Release Installers
+
+on:
+  push:
+    tags:
+      - 'v*' # Triggers ONLY when you push a tag like "v1.0.0"
+
+# Required permissions to allow GitHub Actions to create the Release
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux
+          - os: windows-latest
+            target: windows
+          - os: macos-latest
+            target: macos
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          architecture: x64
+
+      # -----------------------------------------------------------------
+      # LINUX BUILD & PACKAGING (Tarball & AppImage ONLY)
+      # -----------------------------------------------------------------
+      - name: Install Linux Dependencies
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev wget
+
+      - name: Enable Linux Desktop Support
+        if: matrix.os == 'ubuntu-latest'
+        run: flutter config --enable-linux-desktop
+
+      - name: Build Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: flutter build linux --release
+
+      - name: Package Universal Tarball (.tar.gz)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cd build/linux/x64/release/bundle
+          tar -czvf ../../../../../file_peek_linux.tar.gz .
+
+      - name: Package Universal AppImage
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          # 1. Create the AppDir structure required by AppImage
+          mkdir -p AppDir/usr/bin
+          cp -r build/linux/x64/release/bundle/* AppDir/usr/bin/
+          
+          # 2. Create the .desktop file so the OS knows how to run it
+          cat <<EOF > AppDir/file_peek.desktop
+          [Desktop Entry]
+          Name=File Peek
+          Exec=file_peek
+          Icon=file_peek
+          Type=Application
+          Categories=Utility;
+          EOF
+          
+          # 3. Create a temporary blank icon (AppImage compilation will fail without one)
+          touch AppDir/file_peek.png
+          
+          # 4. Download the AppImage tool
+          wget https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage
+          chmod +x appimagetool-x86_64.AppImage
+          
+          # 5. Build the AppImage (using extract-and-run to bypass GitHub Actions FUSE limitations)
+          ./appimagetool-x86_64.AppImage --appimage-extract-and-run AppDir file_peek_linux-x86_64.AppImage
+
+      # -----------------------------------------------------------------
+      # WINDOWS BUILD & EXE PACKAGING
+      # -----------------------------------------------------------------
+      - name: Enable Windows Desktop Support
+        if: matrix.os == 'windows-latest'
+        run: flutter config --enable-windows-desktop
+
+      - name: Build Windows
+        if: matrix.os == 'windows-latest'
+        run: flutter build windows --release
+
+      - name: Package Windows EXE (Inno Setup)
+        if: matrix.os == 'windows-latest'
+        # Note: Ensure you have your installer.iss inside the windows/ folder
+        run: iscc windows/installer.iss
+
+      # -----------------------------------------------------------------
+      # MACOS BUILD & DMG PACKAGING
+      # -----------------------------------------------------------------
+      - name: Enable macOS Desktop Support
+        if: matrix.os == 'macos-latest'
+        run: flutter config --enable-macos-desktop
+
+      - name: Build macOS
+        if: matrix.os == 'macos-latest'
+        run: flutter build macos --release
+
+      - name: Package macOS DMG
+        if: matrix.os == 'macos-latest'
+        run: |
+          hdiutil create -volname "File Peek" -srcfolder build/macos/Build/Products/Release/file_peek.app -ov -format UDZO file_peek_macos.dmg
+
+      # -----------------------------------------------------------------
+      # UPLOAD TO GITHUB RELEASES
+      # -----------------------------------------------------------------
+      - name: Release artifacts
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            file_peek_linux.tar.gz
+            file_peek_linux-x86_64.AppImage
+            build/windows/file_peek_windows_setup.exe
+            file_peek_macos.dmg
+          generate_release_notes: true
