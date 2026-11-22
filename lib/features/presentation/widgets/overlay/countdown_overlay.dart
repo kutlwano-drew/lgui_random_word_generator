@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class CountdownOverlay extends StatefulWidget {
   final int count;
@@ -95,8 +97,8 @@ class _CountdownOverlayState extends State<CountdownOverlay> with SingleTickerPr
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text(
-                      'STARTING AUTOMATIC CYCLE...',
+                    Text(
+                      'STARTING AUTOMATIC CYCLE...'.tr(),
                       style: TextStyle(
                         color: Colors.white54,
                         fontSize: 12,

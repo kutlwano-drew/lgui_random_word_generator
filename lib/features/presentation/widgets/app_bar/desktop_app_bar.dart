@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:country_flags/country_flags.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_glow/flutter_glow.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -29,7 +33,7 @@ class DesktopAppBar extends StatelessWidget implements PreferredSizeWidget {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not open link: $url')),
+          SnackBar(content: Text('Could not open link: {url}'.tr(namedArgs: {'url': url}))),
         );
       }
     }
@@ -154,6 +158,23 @@ class DesktopAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
             child: _buildBarButton('Developer'),
           ),
+          const SizedBox(width: 4),
+
+          // Language selector: app-owned strings are translated by Easy Localization.
+          MenuTooltip(
+            menuContent: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _languageOption(context, 'English', 'GB', 'en'),
+                _languageOption(context, 'Mandarin', 'CN', 'zh'),
+                _languageOption(context, 'Hindi', 'IN', 'hi'),
+                _languageOption(context, 'Arabic', 'SA', 'ar'),
+                _languageOption(context, 'Setswana', 'BW', 'tn'),
+              ],
+            ),
+            child: _buildBarButton('Language'),
+          ),
 
           const Spacer(),
 
@@ -223,11 +244,28 @@ class DesktopAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
   }
 
+  Widget _languageOption(BuildContext context, String label, String countryCode, String languageCode) {
+    return InkWell(
+      onTap: () => context.setLocale(Locale(languageCode)),
+      borderRadius: BorderRadius.circular(4),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+        child: Row(
+          children: [
+            CountryFlags.flag(countryCode.toLowerCase(), width: 20, height: 14),
+            const SizedBox(width: 9),
+            Text(label.tr(), style: const TextStyle(color: Colors.white, fontSize: 13)),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildBarButton(String text) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 10),
       child: Text(
-        text,
+        text.tr(),
         style: const TextStyle(
           color: Colors.white,
           fontSize: 12,

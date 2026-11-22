@@ -1,6 +1,8 @@
 // lib/core/services/url_launcher_service.dart
 
 import 'package:url_launcher/url_launcher.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../errors/app_exception.dart';
 import '../errors/error_handler.dart';
 
@@ -22,14 +24,14 @@ class UrlLauncherService {
           mode: LaunchMode.externalApplication,
         );
         if (!success) {
-          throw const UrlLauncherException(
-            message: 'Unable to start external web viewer. Please copy the URL and visit your browser.',
+          throw UrlLauncherException(
+            message: 'Unable to start external web viewer. Please copy the URL and visit your browser.'.tr(),
             originalError: 'launchUrl returned false',
           );
         }
       } else {
-        throw const UrlLauncherException(
-          message: 'Your system does not support opening external web addresses.',
+        throw UrlLauncherException(
+          message: 'Your system does not support opening external web addresses.'.tr(),
           originalError: 'canLaunchUrl returned false',
         );
       }
@@ -39,7 +41,7 @@ class UrlLauncherService {
         rethrow;
       }
       throw UrlLauncherException(
-        message: 'Could not open link. Please verify your device defaults.',
+        message: 'Could not open link. Please verify your device defaults.'.tr(),
         originalError: e,
       );
     }

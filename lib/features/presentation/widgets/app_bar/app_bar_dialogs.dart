@@ -1,16 +1,17 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart'; // For kIsWeb platform checks
-import 'package:flutter/services.dart';   // For cross-platform SystemNavigator close hooks
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:heroicons/heroicons.dart';
 
 import '../../../../core/services/desktop_entry_service.dart';
 import '../../../../core/services/uninstaller_service.dart';
 
 class AppBarDialogs {
-  
-  // Getter to determine if the File menu/option should be rendered (hidden on web)
+  // Hide File menu on web.
   static bool get showFileOption => !kIsWeb;
 
   // Updates Dialog
@@ -18,7 +19,7 @@ class AppBarDialogs {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           backgroundColor: const Color(0xFF101016),
           shape: RoundedRectangleBorder(
@@ -26,17 +27,24 @@ class AppBarDialogs {
             side: const BorderSide(color: Colors.white12),
           ),
           content: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12.0),
+            padding: const EdgeInsets.symmetric(vertical: 12),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Row(
+                Row(
                   children: [
-                    HeroIcon(HeroIcons.arrowPath, size: 20, color: Colors.blueAccent),
-                    SizedBox(width: 12),
+                    const HeroIcon(
+                      HeroIcons.arrowPath,
+                      size: 20,
+                      color: Colors.blueAccent,
+                    ),
+                    const SizedBox(width: 12),
                     Text(
-                      'Checking for updates...',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      'Checking for updates...'.tr(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -49,10 +57,13 @@ class AppBarDialogs {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+                    onPressed: () => Navigator.pop(dialogContext),
+                    child: Text(
+                      'Cancel'.tr(),
+                      style: const TextStyle(color: Colors.white54),
+                    ),
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -61,8 +72,10 @@ class AppBarDialogs {
     );
 
     Timer(const Duration(seconds: 3), () {
+      if (!context.mounted) return;
+
       if (Navigator.canPop(context)) {
-        Navigator.pop(context); // Close checking loading popup
+        Navigator.pop(context);
         _showUpToDateDialog(context);
       }
     });
@@ -71,27 +84,35 @@ class AppBarDialogs {
   static void _showUpToDateDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: const Color(0xFF101016),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: const BorderSide(color: Colors.white12),
         ),
-        title: const Text('System Update', style: TextStyle(color: Colors.white)),
-        content: const Text('Your inator is fully up to date!', style: TextStyle(color: Colors.white70)),
+        title: Text(
+          'System Update'.tr(),
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: Text(
+          'Your inator is fully up to date!'.tr(),
+          style: const TextStyle(color: Colors.white70),
+        ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Perfect', style: TextStyle(color: Colors.blueAccent)),
-          )
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(
+              'Perfect'.tr(),
+              style: const TextStyle(color: Colors.blueAccent),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  // Desktop Entry (Shortcut) Creation Dialog
+  // Desktop Entry Creation Dialog
   static void showDesktopEntryDialog(BuildContext context) {
-    // Short circuit safely if on Web or non-Linux platforms
     if (kIsWeb || !Platform.isLinux) {
       _showShortcutStatusDialog(context, false);
       return;
@@ -100,17 +121,20 @@ class AppBarDialogs {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: const Color(0xFF101016),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: const BorderSide(color: Colors.white12),
         ),
-        content: const Row(
+        content: Row(
           children: [
-            CircularProgressIndicator(color: Colors.blueAccent),
-            SizedBox(width: 20),
-            Text('Registering desktop launcher...', style: TextStyle(color: Colors.white)),
+            const CircularProgressIndicator(color: Colors.blueAccent),
+            const SizedBox(width: 20),
+            Text(
+              'Registering desktop launcher...'.tr(),
+              style: const TextStyle(color: Colors.white),
+            ),
           ],
         ),
       ),
@@ -118,7 +142,7 @@ class AppBarDialogs {
 
     DesktopEntryService().createDesktopEntry().then((success) {
       if (context.mounted) {
-        Navigator.pop(context); // Dismiss loading Dialog
+        Navigator.pop(context);
         _showShortcutStatusDialog(context, success);
       }
     });
@@ -127,33 +151,40 @@ class AppBarDialogs {
   static void _showShortcutStatusDialog(BuildContext context, bool success) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: const Color(0xFF101016),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: const BorderSide(color: Colors.white12),
         ),
         title: Text(
-          success ? 'Launcher Registered' : 'Registration Failed',
-          style: TextStyle(color: success ? Colors.greenAccent : Colors.redAccent),
+          success ? 'Launcher Registered'.tr() : 'Registration Failed'.tr(),
+          style: TextStyle(
+            color: success ? Colors.greenAccent : Colors.redAccent,
+          ),
         ),
         content: Text(
-          success 
-              ? 'The launcher was successfully registered to your system app launcher database.' 
-              : 'The system failed to register the launcher shortcut. Ensure necessary platform compatibility or write permissions are met.',
+          success
+              ? 'The launcher was successfully registered to your system app launcher database.'
+                    .tr()
+              : 'The system failed to register the launcher shortcut. Ensure necessary platform compatibility or write permissions are met.'
+                    .tr(),
           style: const TextStyle(color: Colors.white70),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK', style: TextStyle(color: Colors.blueAccent)),
-          )
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(
+              'OK'.tr(),
+              style: const TextStyle(color: Colors.blueAccent),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  // Uninstaller Sequence Dialogs
+  // Uninstaller Sequence
   static void showUninstallSequence(BuildContext context) {
     showDialog(
       context: context,
@@ -164,30 +195,50 @@ class AppBarDialogs {
             borderRadius: BorderRadius.circular(12),
             side: const BorderSide(color: Colors.white12),
           ),
-          title: const Row(
+          title: Row(
             children: [
-              HeroIcon(HeroIcons.trash, color: Colors.orangeAccent, size: 22),
-              SizedBox(width: 10),
-              Text('Uninstall Application', style: TextStyle(color: Colors.white)),
+              const HeroIcon(
+                HeroIcons.trash,
+                color: Colors.orangeAccent,
+                size: 22,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Uninstall Application'.tr(),
+                style: const TextStyle(color: Colors.white),
+              ),
             ],
           ),
-          content: const Text(
-            'Are you sure you want to uninstall random word generator?\n\n'
-            'This will remove desktop launchers, local user data, and system configurations.',
-            style: TextStyle(color: Colors.white70, height: 1.4),
+          content: Text(
+            'Are you sure you want to uninstall random word generator.'.tr() +
+                '\n\n' +
+                'This will remove desktop launchers, local user data, and system configurations.'
+                    .tr(),
+            style: const TextStyle(color: Colors.white70, height: 1.4),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx),
-              child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+              child: Text(
+                'Cancel'.tr(),
+                style: const TextStyle(color: Colors.white54),
+              ),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.orangeAccent),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orangeAccent,
+              ),
               onPressed: () {
                 Navigator.pop(dialogCtx);
                 _executeUninstallation(context);
               },
-              child: const Text('Uninstall', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+              child: Text(
+                'Uninstall'.tr(),
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         );
@@ -199,17 +250,20 @@ class AppBarDialogs {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: const Color(0xFF101016),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: const BorderSide(color: Colors.white12),
         ),
-        content: const Row(
+        content: Row(
           children: [
-            CircularProgressIndicator(color: Colors.orangeAccent),
-            SizedBox(width: 20),
-            Text('Removing system components...', style: TextStyle(color: Colors.white)),
+            const CircularProgressIndicator(color: Colors.orangeAccent),
+            const SizedBox(width: 20),
+            Text(
+              'Removing system components...'.tr(),
+              style: const TextStyle(color: Colors.white),
+            ),
           ],
         ),
       ),
@@ -217,7 +271,7 @@ class AppBarDialogs {
 
     UninstallerService().uninstallApp().then((success) {
       if (context.mounted) {
-        Navigator.pop(context); // Dismiss progress dialog
+        Navigator.pop(context);
         _showUninstallStatusDialog(context, success);
       }
     });
@@ -231,16 +285,22 @@ class AppBarDialogs {
         backgroundColor: const Color(0xFF101016),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: success ? Colors.greenAccent : Colors.redAccent),
+          side: BorderSide(
+            color: success ? Colors.greenAccent : Colors.redAccent,
+          ),
         ),
         title: Text(
-          success ? 'Uninstall Complete' : 'Uninstall Incomplete',
-          style: TextStyle(color: success ? Colors.greenAccent : Colors.redAccent),
+          success ? 'Uninstall Complete'.tr() : 'Uninstall Incomplete'.tr(),
+          style: TextStyle(
+            color: success ? Colors.greenAccent : Colors.redAccent,
+          ),
         ),
         content: Text(
           success
               ? 'Application shortcuts and local data have been removed. The application will now close.'
-              : 'Some components could not be automatically purged. You may need elevated permissions.',
+                    .tr()
+              : 'Some components could not be automatically purged. You may need elevated permissions.'
+                    .tr(),
           style: const TextStyle(color: Colors.white70),
         ),
         actions: [
@@ -250,20 +310,27 @@ class AppBarDialogs {
             ),
             onPressed: () {
               Navigator.pop(dialogCtx);
+
               if (kIsWeb || Platform.isAndroid || Platform.isIOS) {
                 SystemNavigator.pop();
               } else {
                 exit(0);
               }
             },
-            child: const Text('Close App', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-          )
+            child: Text(
+              'Close App'.tr(),
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  // Exit dialog
+  // Exit Dialog
   static void showExitSequence(BuildContext context) {
     showDialog(
       context: context,
@@ -274,29 +341,44 @@ class AppBarDialogs {
             borderRadius: BorderRadius.circular(12),
             side: const BorderSide(color: Colors.white12),
           ),
-          title: const Row(
+          title: Row(
             children: [
-              HeroIcon(HeroIcons.exclamationTriangle, color: Colors.redAccent, size: 22),
-              SizedBox(width: 10),
-              Text('Exit Application', style: TextStyle(color: Colors.white)),
+              const HeroIcon(
+                HeroIcons.exclamationTriangle,
+                color: Colors.redAccent,
+                size: 22,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Exit Application'.tr(),
+                style: const TextStyle(color: Colors.white),
+              ),
             ],
           ),
-          content: const Text(
-            'Are you sure you want to terminate this generation session?',
-            style: TextStyle(color: Colors.white70),
+          content: Text(
+            'Are you sure you want to terminate this generation session?'.tr(),
+            style: const TextStyle(color: Colors.white70),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx),
-              child: const Text('Cancel', style: TextStyle(color: Colors.white54)),
+              child: Text(
+                'Cancel'.tr(),
+                style: const TextStyle(color: Colors.white54),
+              ),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+              ),
               onPressed: () {
-                Navigator.pop(dialogCtx); // Dismiss confirmation dialog
+                Navigator.pop(dialogCtx);
                 _startShutdownCountdown(context);
               },
-              child: const Text('Yes, Exit', style: TextStyle(color: Colors.white)),
+              child: Text(
+                'Yes, Exit'.tr(),
+                style: const TextStyle(color: Colors.white),
+              ),
             ),
           ],
         );
@@ -310,19 +392,21 @@ class AppBarDialogs {
 
     void executePlatformExit() {
       if (kIsWeb || Platform.isAndroid || Platform.isIOS) {
-        SystemNavigator.pop(); 
+        SystemNavigator.pop();
       } else {
-        exit(0); 
+        exit(0);
       }
     }
 
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) {
+      builder: (dialogContext) {
         return StatefulBuilder(
           builder: (context, setState) {
-            shutdownTimer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
+            shutdownTimer ??= Timer.periodic(const Duration(seconds: 1), (
+              timer,
+            ) {
               if (countdown > 1) {
                 setState(() => countdown--);
               } else {
@@ -341,10 +425,16 @@ class AppBarDialogs {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const SizedBox(height: 12),
-                  const CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.redAccent)),
+                  const CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.redAccent),
+                  ),
                   const SizedBox(height: 24),
                   Text(
-                    'Shutting down app in:\n$countdown seconds',
+                    'Shutting down app in:'.tr() +
+                        '\n' +
+                        '{count} seconds'.tr(
+                          namedArgs: {'count': '$countdown'},
+                        ),
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: Colors.white,
@@ -362,17 +452,26 @@ class AppBarDialogs {
                           shutdownTimer?.cancel();
                           executePlatformExit();
                         },
-                        child: const Text('Close Now', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                        child: Text(
+                          'Close Now'.tr(),
+                          style: const TextStyle(
+                            color: Colors.redAccent,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                       TextButton(
                         onPressed: () {
                           shutdownTimer?.cancel();
-                          Navigator.pop(context); 
+                          Navigator.pop(dialogContext);
                         },
-                        child: const Text('Stay in App', style: TextStyle(color: Colors.white54)),
+                        child: Text(
+                          'Stay in App'.tr(),
+                          style: const TextStyle(color: Colors.white54),
+                        ),
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
             );
@@ -382,11 +481,11 @@ class AppBarDialogs {
     );
   }
 
-  // Developer Profile bio scrollable Dialog
+  // Developer Profile Bio Dialog
   static void showBioDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           backgroundColor: const Color(0xFF101016),
           shape: RoundedRectangleBorder(
@@ -403,44 +502,84 @@ class AppBarDialogs {
                   const Align(
                     alignment: Alignment.center,
                     child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16.0),
+                      padding: EdgeInsets.symmetric(vertical: 16),
                       child: CircleAvatar(
                         radius: 36,
                         backgroundColor: Colors.white10,
-                        child: HeroIcon(HeroIcons.user, size: 40, color: Colors.white70),
+                        child: HeroIcon(
+                          HeroIcons.user,
+                          size: 40,
+                          color: Colors.white70,
+                        ),
                       ),
                     ),
                   ),
                   const Divider(color: Colors.white10),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Name: Kutlwano P. Maruatona',
-                    style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                  Text(
+                    'Name: Kutlwano P. Maruatona'.tr(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
-                    'Alias: Drew',
-                    style: TextStyle(color: Colors.white70, fontSize: 13),
+                  Text(
+                    'Alias: Drew'.tr(),
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
                   ),
                   const SizedBox(height: 12),
-                  const Text(
-                    'Bio:',
-                    style: TextStyle(color: Colors.white54, fontSize: 11, letterSpacing: 1.2),
+                  Text(
+                    'Bio:'.tr(),
+                    style: const TextStyle(
+                      color: Colors.white54,
+                      fontSize: 11,
+                      letterSpacing: 1.2,
+                    ),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
-                    'Systems enthusiast and desktop developer working on building robust UI tools for power-users.\n\n'
-                    'Believer in highly modular codebases, keyboard-driven navigation models, and clean visual layouts that don\'t get in the developer\'s way.\n\n'
-                    'Passionate about cognitive architectures, evolutionary theories, and building things that last.',
-                    style: TextStyle(color: Colors.white, fontSize: 13, height: 1.5),
+                  Text(
+                    'Systems enthusiast and desktop developer working on building robust UI tools for power-users.'
+                        .tr(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Believer in highly modular codebases, keyboard-driven navigation models, and clean visual layouts that don't get in the developer's way."
+                        .tr(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      height: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Passionate about cognitive architectures, evolutionary theories, and building things that last.'
+                        .tr(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      height: 1.5,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Align(
                     alignment: Alignment.centerRight,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.white10),
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Close', style: TextStyle(color: Colors.white70)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white10,
+                      ),
+                      onPressed: () => Navigator.pop(dialogContext),
+                      child: Text(
+                        'Close'.tr(),
+                        style: const TextStyle(color: Colors.white70),
+                      ),
                     ),
                   ),
                 ],

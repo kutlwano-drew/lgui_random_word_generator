@@ -2,6 +2,8 @@
 
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/services/sound_service.dart'; // Adjust path based on your project structure
 
@@ -37,8 +39,8 @@ class _SoundSettingsDialogState extends State<SoundSettingsDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Sounds',
+                  Text(
+                    'Sounds'.tr(),
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 16,
@@ -71,7 +73,7 @@ class _SoundSettingsDialogState extends State<SoundSettingsDialog> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    _sound.soundsOn ? 'Sounds on' : 'Sounds off',
+                    _sound.soundsOn ? 'Sounds on'.tr() : 'Sounds off'.tr(),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 14,
@@ -112,8 +114,8 @@ class _SoundSettingsDialogState extends State<SoundSettingsDialog> {
               const SizedBox(height: 24),
 
               // Volume Level Controller Layout
-              const Text(
-                'Volume',
+              Text(
+                'Volume'.tr(),
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 14,

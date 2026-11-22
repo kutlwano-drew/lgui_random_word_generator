@@ -2,6 +2,8 @@
 
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:heroicons/heroicons.dart';
 
 class NestedMenuHeader extends StatefulWidget {
@@ -122,7 +124,7 @@ class _NestedMenuHeaderState extends State<NestedMenuHeader> {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  widget.text,
+                  widget.text.tr(),
                   style: const TextStyle(
                     color: Colors.white, 
                     fontSize: 13, 
@@ -181,7 +183,7 @@ class _NestedMenuOptionState extends State<NestedMenuOption> {
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
-                  widget.text,
+                  widget.text.tr(),
                   style: const TextStyle(
                     color: Colors.white, 
                     fontSize: 13, 

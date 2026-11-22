@@ -2,6 +2,8 @@
 
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'app_exception.dart';
 
 class ErrorHandler {
@@ -22,12 +24,12 @@ class ErrorHandler {
   /// Map raw developer errors into soft, understandable messages.
   static String getReadableMessage(Object error) {
     if (error is AppException) {
-      return error.message;
+      return error.message.tr();
     }
     if (error is TimeoutException) {
-      return 'The connection is taking too long. Please check your network stability.';
+      return 'The connection is taking too long. Please check your network stability.'.tr();
     }
-    return 'Something unexpected occurred, but we have captured the issue and are resolving it.';
+    return 'Something unexpected occurred, but we have captured the issue and are resolving it.'.tr();
   }
 
   /// Instantly renders a floating error indicator anywhere on the active screen.

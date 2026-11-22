@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import '../../../../core/services/sound_service.dart';
 import '../dialogs/sound_settings_dialog.dart';
 import 'timer_input.dart';
@@ -35,7 +37,7 @@ class ControlRow extends StatelessWidget {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
           icon: const Icon(Icons.flash_on, size: 16),
-          label: const Text('Generate', style: TextStyle(fontWeight: FontWeight.bold)),
+          label: Text('Generate'.tr(), style: TextStyle(fontWeight: FontWeight.bold)),
         ),
         const SizedBox(width: 12),
 

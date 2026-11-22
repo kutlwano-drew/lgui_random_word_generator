@@ -5,6 +5,8 @@ import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_glow/flutter_glow.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../widgets/app_bar/desktop_app_bar.dart';
 import '../widgets/background/aura_background.dart';
@@ -45,6 +47,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
   String _toolWord = '';
   String _scrambled = '';
   String _feedback = '';
+  bool _feedbackCorrect = false;
   Set<int> _missingIndexes = {};
   bool _reveal = false;
   Timer? _timer;
@@ -87,17 +90,17 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
     late String category;
     if (roll == 0) {
       next = WordPair.random().asPascalCase;
-      category = 'WORD PAIR · ADJECTIVE + NOUN';
+      category = 'category_word_pair';
     } else if (roll == 1) {
       next = _cap(nouns[_random.nextInt(nouns.length)]);
-      category = 'NOUN';
+      category = 'category_noun';
     } else {
       next = _cap(adjectives[_random.nextInt(adjectives.length)]);
-      category = 'ADJECTIVE';
+      category = 'category_adjective';
     }
     setState(() {
       _word = next;
-      _category = 'CATEGORY: $category';
+      _category = category;
       _generated++;
       _history.remove(next);
       _history.insert(0, next);
@@ -110,6 +113,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
     _toolWord = _word;
     _answer.clear();
     _feedback = '';
+    _feedbackCorrect = false;
     _reveal = false;
     _scrambled = _shuffleWord(_toolWord);
     final indexes = List<int>.generate(_toolWord.length, (i) => i)
@@ -177,7 +181,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
     Clipboard.setData(ClipboardData(text: value));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Copied "$value"'),
+        content: Text('Copied {value}'.tr(namedArgs: {'value': value})),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(milliseconds: 1300),
       ),
@@ -230,12 +234,11 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
 
   void _check() {
     final expected = _tool == _Tool.missing ? _toolWord : _toolWord;
-    setState(
-      () => _feedback =
-          _answer.text.trim().toLowerCase() == expected.toLowerCase()
-          ? 'Correct! Nicely done.'
-          : 'Not quite — try again.',
-    );
+    final correct = _answer.text.trim().toLowerCase() == expected.toLowerCase();
+    setState(() {
+      _feedbackCorrect = correct;
+      _feedback = correct ? 'feedback_correct'.tr() : 'feedback_incorrect'.tr();
+    });
   }
 
   Widget _panel(
@@ -263,7 +266,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
-        title,
+        title.tr(),
         style: const TextStyle(
           color: Colors.white,
           fontSize: 25,
@@ -272,7 +275,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
       ),
       const SizedBox(height: 5),
       Text(
-        subtitle,
+        subtitle.tr(),
         style: const TextStyle(color: Colors.white54, fontSize: 13),
       ),
     ],
@@ -305,7 +308,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
               const SizedBox(width: 7),
               Flexible(
                 child: Text(
-                  title,
+                  title.tr(),
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: selected ? Colors.white : Colors.white70,
@@ -342,8 +345,8 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                           size: 23,
                         ),
                         const SizedBox(width: 9),
-                        const Text(
-                          'WORD LAB',
+                        Text(
+                          'WORD LAB'.tr(),
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 13,
@@ -353,7 +356,9 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                         ),
                         const Spacer(),
                         Text(
-                          '$_generated generated',
+                          'generated_count'.tr(
+                            namedArgs: {'count': '$_generated'},
+                          ),
                           style: const TextStyle(
                             color: Colors.white38,
                             fontSize: 11,
@@ -437,8 +442,8 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const GlowText(
-                    'NEXT WORD IN  ',
+                  GlowText(
+                    'NEXT WORD IN'.tr(),
                     style: TextStyle(color: Colors.white70, fontSize: 12),
                     glowColor: Colors.white24,
                   ),
@@ -451,8 +456,8 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                     ),
                     glowColor: const Color(0xFFFF7B9C),
                   ),
-                  const GlowText(
-                    '  SECONDS',
+                  GlowText(
+                    'SECONDS'.tr(),
                     style: TextStyle(color: Colors.white70, fontSize: 12),
                     glowColor: Colors.white24,
                   ),
@@ -480,7 +485,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              _category,
+              'category_prefix'.tr(namedArgs: {'category': _category.tr()}),
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.white38,
@@ -557,7 +562,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
   }) => OutlinedButton.icon(
     onPressed: tap,
     icon: Icon(icon, size: 15),
-    label: Text(label),
+    label: Text(label.tr()),
     style: OutlinedButton.styleFrom(
       foregroundColor: color,
       side: BorderSide(color: color.withOpacity(.35)),
@@ -581,7 +586,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
             const SizedBox(width: 7),
             Expanded(
               child: Text(
-                title,
+                title.tr(),
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 13,
@@ -596,7 +601,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
             if (words.isNotEmpty)
               IconButton(
                 visualDensity: VisualDensity.compact,
-                tooltip: 'Clear $title',
+                tooltip: 'Clear {title}'.tr(namedArgs: {'title': title.tr()}),
                 onPressed: () => setState(words.clear),
                 icon: const Icon(
                   Icons.delete_outline,
@@ -607,10 +612,10 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
           ],
         ),
         if (words.isEmpty)
-          const Padding(
+          Padding(
             padding: EdgeInsets.symmetric(vertical: 10),
             child: Text(
-              'Nothing here yet.',
+              'Nothing here yet.'.tr(),
               style: TextStyle(color: Colors.white38, fontSize: 12),
             ),
           )
@@ -662,8 +667,8 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'LETTER CONDITIONS',
+              Text(
+                'LETTER CONDITIONS'.tr(),
                 style: TextStyle(
                   color: Color(0xFF67D9D0),
                   fontSize: 10,
@@ -702,8 +707,8 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                 },
               ),
               const SizedBox(height: 18),
-              const Text(
-                'WORD LENGTH',
+              Text(
+                'WORD LENGTH'.tr(),
                 style: TextStyle(
                   color: Color(0xFF67D9D0),
                   fontSize: 10,
@@ -756,7 +761,9 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
               Row(
                 children: [
                   Text(
-                    '${results.length} matching words',
+                    '{count} matching words'.tr(
+                      namedArgs: {'count': '${results.length}'},
+                    ),
                     style: const TextStyle(
                       color: Colors.white70,
                       fontWeight: FontWeight.w700,
@@ -767,7 +774,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                   TextButton.icon(
                     onPressed: _clearFilters,
                     icon: const Icon(Icons.refresh, size: 16),
-                    label: const Text('Clear filters'),
+                    label: Text('Clear filters'.tr()),
                     style: TextButton.styleFrom(
                       foregroundColor: const Color(0xFF67D9D0),
                     ),
@@ -780,11 +787,11 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
         const SizedBox(height: 13),
         _panel(
           results.isEmpty
-              ? const Center(
+              ? Center(
                   child: Padding(
-                    padding: EdgeInsets.all(18),
+                    padding: const EdgeInsets.all(18),
                     child: Text(
-                      'No matches. Try loosening a condition.',
+                      'No matches. Try loosening a condition.'.tr(),
                       style: TextStyle(color: Colors.white54),
                     ),
                   ),
@@ -792,8 +799,8 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'MATCHES · TAP A WORD TO COPY',
+                    Text(
+                      'MATCHES · TAP A WORD TO COPY'.tr(),
                       style: TextStyle(
                         color: Colors.white38,
                         fontSize: 10,
@@ -839,10 +846,11 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                           .toList(),
                     ),
                     if (results.length > 100)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 12),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 12),
                         child: Text(
-                          'Showing the first 100 results. Add conditions to narrow your search.',
+                          'Showing the first 100 results. Add conditions to narrow your search.'
+                              .tr(),
                           style: TextStyle(color: Colors.white38, fontSize: 11),
                         ),
                       ),
@@ -851,8 +859,9 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
           padding: const EdgeInsets.all(16),
         ),
         const SizedBox(height: 8),
-        const Text(
-          'Results come from the words bundled with this app; this is not a complete dictionary.',
+        Text(
+          'Results come from the words bundled with this app; this is not a complete dictionary.'
+              .tr(),
           style: TextStyle(color: Colors.white38, fontSize: 11),
         ),
       ],
@@ -868,7 +877,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
-        label,
+        label.tr(),
         style: const TextStyle(
           color: Colors.white70,
           fontSize: 12,
@@ -885,7 +894,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
         onChanged: (_) => setState(() {}),
         style: const TextStyle(color: Colors.white, fontSize: 14),
         decoration: InputDecoration(
-          hintText: hint,
+          hintText: hint.tr(),
           hintStyle: const TextStyle(color: Colors.white24),
           filled: true,
           fillColor: Colors.white.withOpacity(.045),
@@ -969,7 +978,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                       Icon(icons[i], color: const Color(0xFFFFB86B), size: 21),
                       const SizedBox(height: 9),
                       Text(
-                        titles[i],
+                        titles[i].tr(),
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -978,7 +987,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                       ),
                       const SizedBox(height: 5),
                       Text(
-                        descriptions[i],
+                        descriptions[i].tr(),
                         style: const TextStyle(
                           color: Colors.white54,
                           fontSize: 10,
@@ -1000,7 +1009,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                 children: [
                   Expanded(
                     child: Text(
-                      titles[_tool.index],
+                      titles[_tool.index].tr(),
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w800,
@@ -1011,7 +1020,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                   TextButton.icon(
                     onPressed: () => setState(_prepareTool),
                     icon: const Icon(Icons.autorenew, size: 16),
-                    label: const Text('New word'),
+                    label: Text('New word'.tr()),
                     style: TextButton.styleFrom(
                       foregroundColor: const Color(0xFFFFB86B),
                     ),
@@ -1019,7 +1028,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
                 ],
               ),
               Text(
-                descriptions[_tool.index],
+                descriptions[_tool.index].tr(),
                 style: const TextStyle(color: Colors.white54, fontSize: 12),
               ),
               const SizedBox(height: 18),
@@ -1076,7 +1085,9 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
           _wordDisplay(shown),
           const SizedBox(height: 8),
           Text(
-            '${_missingIndexes.length} letters missing',
+            '{count} letters missing'.tr(
+              namedArgs: {'count': '${_missingIndexes.length}'},
+            ),
             style: const TextStyle(color: Colors.white54, fontSize: 12),
           ),
           const SizedBox(height: 14),
@@ -1087,7 +1098,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
             child: TextButton(
               onPressed: () => setState(() => _reveal = !_reveal),
               child: Text(
-                _reveal ? 'Hide answer' : 'Reveal answer',
+                _reveal ? 'Hide answer'.tr() : 'Reveal answer'.tr(),
                 style: const TextStyle(color: Color(0xFFFFB86B)),
               ),
             ),
@@ -1129,8 +1140,9 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
             ],
           ),
           const SizedBox(height: 15),
-          const Text(
-            'Try a letter-count challenge: how many times does a chosen letter appear? What is the third letter? Does the word contain “a”?',
+          Text(
+            'Try a letter-count challenge: how many times does a chosen letter appear? What is the third letter? Does the word contain “a”?'
+                .tr(),
             style: TextStyle(color: Colors.white54, fontSize: 12),
           ),
           const SizedBox(height: 12),
@@ -1168,8 +1180,8 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
   Widget _letterChallengeInput() => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      const Text(
-        'Check a letter',
+      Text(
+        'Check a letter'.tr(),
         style: TextStyle(
           color: Colors.white70,
           fontSize: 12,
@@ -1183,6 +1195,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
         onChanged: (value) => setState(() {
           if (value.isEmpty) {
             _feedback = '';
+            _feedbackCorrect = false;
           } else {
             final letter = value.toLowerCase();
             final lower = _toolWord.toLowerCase();
@@ -1191,15 +1204,22 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
             for (var i = 0; i < lower.length; i++) {
               if (lower[i] == letter) positions.add(i + 1);
             }
+            _feedbackCorrect = false;
             _feedback = count == 0
-                ? '“$letter” does not appear in this word.'
-                : '“$letter” appears $count time${count == 1 ? '' : 's'} · position${positions.length == 1 ? '' : 's'} ${positions.join(', ')}.';
+                ? 'letter_not_found'.tr(namedArgs: {'letter': letter})
+                : 'letter_found'.tr(
+                    namedArgs: {
+                      'letter': letter,
+                      'count': '$count',
+                      'positions': positions.join(', '),
+                    },
+                  );
           }
         }),
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
           counterText: '',
-          hintText: 'Enter one letter',
+          hintText: 'Enter one letter'.tr(),
           hintStyle: const TextStyle(color: Colors.white24),
           filled: true,
           fillColor: Colors.white.withOpacity(.045),
@@ -1238,7 +1258,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
       Align(
         alignment: Alignment.centerLeft,
         child: Text(
-          label,
+          label.tr(),
           style: const TextStyle(
             color: Colors.white70,
             fontSize: 12,
@@ -1249,11 +1269,14 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
       const SizedBox(height: 6),
       TextField(
         controller: _answer,
-        onChanged: (_) => setState(() => _feedback = ''),
+        onChanged: (_) => setState(() {
+          _feedback = '';
+          _feedbackCorrect = false;
+        }),
         onSubmitted: (_) => _check(),
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
-          hintText: hint,
+          hintText: hint.tr(),
           hintStyle: const TextStyle(color: Colors.white24),
           filled: true,
           fillColor: Colors.white.withOpacity(.045),
@@ -1282,7 +1305,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
         child: ElevatedButton.icon(
           onPressed: _check,
           icon: const Icon(Icons.check, size: 17),
-          label: const Text('Check answer'),
+          label: Text('Check answer'.tr()),
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFFFB86B),
             foregroundColor: const Color(0xFF24180D),
@@ -1299,7 +1322,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
           child: Text(
             _feedback,
             style: TextStyle(
-              color: _feedback.startsWith('Correct')
+              color: _feedbackCorrect
                   ? const Color(0xFF79E2B2)
                   : const Color(0xFFFFA6A6),
               fontWeight: FontWeight.w600,
@@ -1320,7 +1343,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label.toUpperCase(),
+          label.tr().toUpperCase(),
           style: const TextStyle(
             color: Color(0xFFFFC98F),
             fontSize: 9,
@@ -1347,7 +1370,7 @@ class _GeneratorScreenState extends State<GeneratorScreen> {
       children: [
         Expanded(
           child: Text(
-            label,
+            label.tr(),
             style: const TextStyle(color: Colors.white54, fontSize: 12),
           ),
         ),

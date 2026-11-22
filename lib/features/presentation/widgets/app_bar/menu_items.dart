@@ -1,6 +1,8 @@
 // lib/presentation/widgets/app_bar/menu_items.dart
 
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -48,7 +50,7 @@ class _MenuActionItemState extends State<MenuActionItem> {
               ),
               const SizedBox(width: 10),
               Text(
-                widget.text, 
+                widget.text.tr(), 
                 style: TextStyle(
                   color: widget.textColor, 
                   fontSize: 13, 
@@ -107,7 +109,7 @@ class _MenuSocialItemState extends State<MenuSocialItem> {
               ),
               const SizedBox(width: 10),
               Text(
-                widget.text, 
+                widget.text.tr(), 
                 style: const TextStyle(
                   color: Colors.white, 
                   fontSize: 13, 
